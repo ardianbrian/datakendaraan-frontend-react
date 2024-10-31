@@ -18,6 +18,7 @@ const CreateVehicle = () => {
   });
 
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,18 +27,27 @@ const CreateVehicle = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setErrorMessage("");
     axios
       .post("http://localhost:8080/api/vehicles", vehicle)
       .then((response) => {
         console.log("Vehicle added successfully:", response.data);
         navigate("/"); // Redirect to the vehicle table after adding
       })
-      .catch((error) => console.error("Error adding vehicle:", error));
+      .catch((error) => {
+        if (error.response && error.response.data) {
+          setErrorMessage(error.response.data); // Correctly accessing the message
+        } else {
+          setErrorMessage("An unexpected error occurred"); // Fallback for general errors
+          console.log("Error adding Vehicle: ", error);
+        }
+      });
   };
 
   return (
     <div className="container mt-4">
       <h2>Tambah Data Kendaraan</h2>
+      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
       <form onSubmit={handleSubmit}>
         <div className="row mb-3">
           <div className="col">
